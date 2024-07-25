@@ -285,6 +285,7 @@ require('lazy').setup({
   -- "gc" to comment visual regions/lines
   'tpope/vim-commentary',
   'tpope/vim-vinegar',
+  'stefandtw/quickfix-reflector.vim',
   'github/copilot.vim',
   {
     'tpope/vim-fugitive',
@@ -331,6 +332,12 @@ require('lazy').setup({
       -- make autopairs and completion work together
       cmp.event:on('confirm_done', cmp_autopairs.on_confirm_done())
     end,
+  },
+  {
+    'kylechui/nvim-surround',
+    event = { 'BufReadPre', 'BufNewFile' },
+    version = '*', -- Use for stability; omit to use `main` branch for the latest features
+    config = true,
   },
 
   -- Here is a more advanced example where we pass configuration
