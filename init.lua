@@ -41,7 +41,6 @@ What is Kickstart?
     - :help lua-guide
     - (or HTML version): https://neovim.io/doc/user/lua-guide.html
 
-Kickstart Guide:
 
   TODO: The very first thing you should do is to run the command `:Tutor` in Neovim.
 
@@ -92,6 +91,12 @@ vim.g.maplocalleader = ' '
 
 -- Set to true if you have a Nerd Font installed and selected in the terminal
 vim.g.have_nerd_font = false
+
+-- tabs & indentation
+vim.opt.tabstop = 2 -- 2 spaces for tabs (prettier default)
+vim.opt.shiftwidth = 2
+vim.opt.expandtab = true -- expand tab to spaces
+vim.opt.autoindent = true -- copy indent from current line when starting new one
 
 -- [[ Setting options ]]
 -- See `:help vim.opt`
@@ -266,7 +271,7 @@ vim.opt.rtp:prepend(lazypath)
 -- NOTE: Here is where you install your plugins.
 require('lazy').setup({
   -- NOTE: Plugins can be added with a link (or for a github repo: 'owner/repo' link).
-  'tpope/vim-sleuth', -- Detect tabstop and shiftwidth automatically
+  -- 'tpope/vim-sleuth', -- Detect tabstop and shiftwidth automatically
 
   -- NOTE: Plugins can also be added by using a table,
   -- with the first argument being the link and the following
@@ -278,25 +283,108 @@ require('lazy').setup({
   --    require('Comment').setup({})
 
   -- "gc" to comment visual regions/lines
+  'tpope/vim-commentary',
+  'tpope/vim-vinegar',
+  'github/copilot.vim',
+  {
+    'tpope/vim-fugitive',
+    keys = {
+      { '<leader>diff', '<cmd>Gvdiff<CR>', { desc = 'Open a git diff horizontally' } },
+      { '<leader>git', '<cmd>G<CR>', { desc = 'Open up fugitive' } },
+    },
+  },
   { 'numToStr/Comment.nvim', opts = {} },
+  {
+    'kdheepak/lazygit.nvim',
+    -- optional for floating window border decoration
+    dependencies = {
+      'nvim-lua/plenary.nvim',
+    },
+  },
+  {
+    'windwp/nvim-autopairs',
+    event = { 'InsertEnter' },
+    dependencies = {
+      'hrsh7th/nvim-cmp',
+      'nvim-treesitter/nvim-treesitter',
+    },
+    config = function()
+      -- import nvim-autopairs
+      local autopairs = require 'nvim-autopairs'
+
+      -- configure autopairs
+      autopairs.setup {
+        check_ts = true, -- enable treesitter
+        ts_config = {
+          lua = { 'string' }, -- don't add pairs in lua string treesitter nodes
+          javascript = { 'template_string' }, -- don't add pairs in javscript template_string treesitter nodes
+          java = false, -- don't check treesitter on java
+        },
+      }
+
+      -- import nvim-autopairs completion functionality
+      local cmp_autopairs = require 'nvim-autopairs.completion.cmp'
+
+      -- import nvim-cmp plugin (completions plugin)
+      local cmp = require 'cmp'
+
+      -- make autopairs and completion work together
+      cmp.event:on('confirm_done', cmp_autopairs.on_confirm_done())
+    end,
+  },
 
   -- Here is a more advanced example where we pass configuration
   -- options to `gitsigns.nvim`. This is equivalent to the following Lua:
   --    require('gitsigns').setup({ ... })
   --
   -- See `:help gitsigns` to understand what the configuration keys do
-  { -- Adds git related signs to the gutter, as well as utilities for managing changes
+  {
     'lewis6991/gitsigns.nvim',
-    opts = {
-      signs = {
-        add = { text = '+' },
-        change = { text = '~' },
-        delete = { text = '_' },
-        topdelete = { text = '‾' },
-        changedelete = { text = '~' },
-      },
-    },
+    -- event = { "BufReadPre", "BufNewFile" },
     config = function()
+      -- load the colorscheme here
+      local gitsigns = require 'gitsigns'
+      gitsigns.setup {
+        signs = {
+          add = { text = '+' },
+          change = { text = '~' },
+          delete = { text = '-' },
+          topdelete = { text = '-' },
+          changedelete = { text = '~' },
+          untracked = { text = 'u' },
+        },
+        signcolumn = true, -- Toggle with `:Gitsigns toggle_signs`
+        numhl = false, -- Toggle with `:Gitsigns toggle_numhl`
+        linehl = false, -- Toggle with `:Gitsigns toggle_linehl`
+        word_diff = false, -- Toggle with `:Gitsigns toggle_word_diff`
+        watch_gitdir = {
+          follow_files = true,
+        },
+        attach_to_untracked = true,
+        current_line_blame = false, -- Toggle with `:Gitsigns toggle_current_line_blame`
+        current_line_blame_opts = {
+          virt_text = true,
+          virt_text_pos = 'eol', -- 'eol' | 'overlay' | 'right_align'
+          delay = 1000,
+          ignore_whitespace = false,
+        },
+        current_line_blame_formatter = '<author>, <author_time:%Y-%m-%d> - <summary>',
+        sign_priority = 6,
+        update_debounce = 100,
+        status_formatter = nil, -- Use default
+        max_file_length = 40000, -- Disable if file is longer than this (in lines)
+        preview_config = {
+          -- Options passed to nvim_open_win
+          border = 'single',
+          style = 'minimal',
+          relative = 'cursor',
+          row = 0,
+          col = 1,
+        },
+        yadm = {
+          enable = false,
+        },
+      }
       vim.keymap.set('n', '<leader>gtb', '<cmd>Gitsigns blame_line<cr>')
       vim.keymap.set('n', '<leader>gsh', '<cmd>Gitsigns stage_hunk<cr>')
       vim.keymap.set('n', '<leader>gph', '<cmd>Gitsigns preview_hunk<cr>')
@@ -304,6 +392,7 @@ require('lazy').setup({
       vim.keymap.set('n', '<leader>grh', '<cmd>Gitsigns reset_hunk<cr>')
       vim.keymap.set('n', '<leader>guh', '<cmd>Gitsigns undo_stage_hunk<cr>')
       vim.keymap.set('n', '<leader>gl', '<cmd>LazyGit<cr>')
+      vim.keymap.set('n', '<leader>lg', '<cmd>LazyGit<cr>')
     end,
   },
 
@@ -477,6 +566,23 @@ require('lazy').setup({
       end, { desc = '[S]earch [N]eovim files' })
     end,
   },
+  {
+    'ThePrimeagen/harpoon',
+    dependencies = {
+      'nvim-lua/plenary.nvim',
+    },
+    config = function()
+      -- set keymaps
+      local keymap = vim.keymap -- for conciseness
+
+      keymap.set('n', '<leader>hm', "<cmd>lua require('harpoon.mark').add_file()<cr>", { desc = 'Mark file with harpoon' })
+      keymap.set('n', '<leader>hui', "<cmd>lua require('harpoon.ui').toggle_quick_menu()<cr>", { desc = 'Go to previous harpoon mark' })
+      keymap.set('n', ';a', "<cmd>lua require('harpoon.ui').nav_file(1)<cr>", { desc = 'Go to first file' })
+      keymap.set('n', ';s', "<cmd>lua require('harpoon.ui').nav_file(2)<cr>", { desc = 'Go to second file' })
+      keymap.set('n', ';d', "<cmd>lua require('harpoon.ui').nav_file(3)<cr>", { desc = 'Go to third file' })
+      keymap.set('n', ';f', "<cmd>lua require('harpoon.ui').nav_file(4)<cr>", { desc = 'Go to fourth file' })
+    end,
+  },
 
   { -- LSP Configuration & Plugins
     'neovim/nvim-lspconfig',
@@ -645,7 +751,14 @@ require('lazy').setup({
         --    https://github.com/pmizio/typescript-tools.nvim
         --
         -- But for many setups, the LSP (`tsserver`) will work just fine
-        -- tsserver = {},
+        cssls = {},
+        emmet_ls = {},
+        eslint = {},
+        graphql = {},
+        html = {},
+        jsonls = {},
+        tailwindcss = {},
+        tsserver = {},
         --
 
         lua_ls = {
@@ -905,7 +1018,24 @@ require('lazy').setup({
     'nvim-treesitter/nvim-treesitter',
     build = ':TSUpdate',
     opts = {
-      ensure_installed = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc' },
+      ensure_installed = {
+        'bash',
+        'c',
+        'diff',
+        'html',
+        'lua',
+        'luadoc',
+        'markdown',
+        'markdown_inline',
+        'query',
+        'vim',
+        'vimdoc',
+        'json',
+        'javascript',
+        'typescript',
+        'tsx',
+        'css',
+      },
       -- Autoinstall languages that are not installed
       auto_install = true,
       highlight = {
@@ -921,6 +1051,7 @@ require('lazy').setup({
       -- [[ Configure Treesitter ]] See `:help nvim-treesitter`
 
       -- Prefer git instead of curl in order to improve connectivity in some environments
+      opts.ignore_install = { 'help' }
       require('nvim-treesitter.install').prefer_git = true
       ---@diagnostic disable-next-line: missing-fields
       require('nvim-treesitter.configs').setup(opts)
