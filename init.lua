@@ -583,6 +583,11 @@ require('lazy').setup({
       keymap.set('n', ';f', "<cmd>lua require('harpoon.ui').nav_file(4)<cr>", { desc = 'Go to fourth file' })
     end,
   },
+  {
+    'pmizio/typescript-tools.nvim',
+    dependencies = { 'nvim-lua/plenary.nvim', 'neovim/nvim-lspconfig' },
+    opts = {},
+  },
 
   { -- LSP Configuration & Plugins
     'neovim/nvim-lspconfig',
@@ -805,6 +810,12 @@ require('lazy').setup({
           end,
         },
       }
+
+      vim.keymap.set('n', '<leader>oi', '<cmd>TSToolsOrganizeImports<CR>')
+      vim.keymap.set('n', '<leader>ri', '<cmd>TSToolsRemoveUnusedImports<CR>')
+      vim.keymap.set('n', '<leader>ai', '<cmd>TSToolsAddMissingImports<CR>')
+      vim.keymap.set('n', '<leader>fa', '<cmd>TSToolsFixAll<CR>')
+      vim.keymap.set('n', '<leader>fr', '<cmd>TSToolsRenameFile<CR>')
     end,
   },
 
