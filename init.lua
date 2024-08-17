@@ -288,6 +288,13 @@ require('lazy').setup({
   'stefandtw/quickfix-reflector.vim',
   'github/copilot.vim',
   {
+    'stevearc/oil.nvim',
+    opts = {},
+    -- Optional dependencies
+    dependencies = { { 'echasnovski/mini.icons', opts = {} } },
+    -- dependencies = { "nvim-tree/nvim-web-devicons" }, -- use if prefer nvim-web-devicons
+  },
+  {
     'tpope/vim-fugitive',
     keys = {
       { '<leader>diff', '<cmd>Gvdiff<CR>', { desc = 'Open a git diff horizontally' } },
@@ -590,12 +597,6 @@ require('lazy').setup({
       keymap.set('n', ';f', "<cmd>lua require('harpoon.ui').nav_file(4)<cr>", { desc = 'Go to fourth file' })
     end,
   },
-  {
-    'pmizio/typescript-tools.nvim',
-    dependencies = { 'nvim-lua/plenary.nvim', 'neovim/nvim-lspconfig' },
-    opts = {},
-  },
-
   { -- LSP Configuration & Plugins
     'neovim/nvim-lspconfig',
     dependencies = {
@@ -818,11 +819,11 @@ require('lazy').setup({
         },
       }
 
-      vim.keymap.set('n', '<leader>oi', '<cmd>TSToolsOrganizeImports<CR>')
-      vim.keymap.set('n', '<leader>ri', '<cmd>TSToolsRemoveUnusedImports<CR>')
-      vim.keymap.set('n', '<leader>ai', '<cmd>TSToolsAddMissingImports<CR>')
-      vim.keymap.set('n', '<leader>fa', '<cmd>TSToolsFixAll<CR>')
-      vim.keymap.set('n', '<leader>fr', '<cmd>TSToolsRenameFile<CR>')
+      -- vim.keymap.set('n', '<leader>oi', '<cmd>TSToolsOrganizeImports<CR>')
+      -- vim.keymap.set('n', '<leader>ri', '<cmd>TSToolsRemoveUnusedImports<CR>')
+      -- vim.keymap.set('n', '<leader>ai', '<cmd>TSToolsAddMissingImports<CR>')
+      -- vim.keymap.set('n', '<leader>fa', '<cmd>TSToolsFixAll<CR>')
+      -- vim.keymap.set('n', '<leader>fr', '<cmd>TSToolsRenameFile<CR>')
     end,
   },
 
@@ -858,7 +859,7 @@ require('lazy').setup({
         --
         -- You can use a sub-list to tell conform to run *until* a formatter
         -- is found.
-        javascript = { { 'prettierd', 'prettier' } },
+        javascript = { 'prettierd', 'prettier', stop_after_first = true },
       },
     },
   },
